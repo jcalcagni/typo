@@ -79,6 +79,25 @@ class Article < Content
   def has_child?
     Article.exists?({:parent_id => self.id})
   end
+ 
+  #Change to add merge functionality for Saas CS 169.2x
+  #find the other article, merge this article with the other article body
+  #then keep comments by adding to merged article before destroying article
+  
+  def merge_with other_article_id
+    other_article = Article.find(other_article_id)
+    self.body = self.body + "\n" + other_article.body
+  
+    comments = other_article.comments
+    comments.each do |comment|
+      comment.article = self
+      comment.save
+      Comment.create(comment.attributes)
+    end
+  
+    other_article.destroy
+    self
+  end
 
   attr_accessor :draft, :keywords
 
