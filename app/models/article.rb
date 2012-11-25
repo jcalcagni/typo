@@ -83,7 +83,23 @@ class Article < Content
   #Change to add merge functionality for Saas CS 169.2x
   #find the other article, merge this article with the other article body
   #then keep comments by adding to merged article before destroying article
-   
+  
+  def merge_with other_article_id
+    other_article = Article.find(other_article_id)
+    self.body = self.body + "\n" + other_article.body
+  
+    comments = other_article.comments
+    comments.each do |comment|
+      comment.article = self
+      comment.save
+      Comment.create(comment.attributes)
+    end
+  
+    other_article.delete #destroy
+    self
+  end
+
+ 
   attr_accessor :draft, :keywords
 
   has_state(:state,
@@ -99,34 +115,6 @@ class Article < Content
   include Article::States
 
   class << self
-   def merge(first_id, second_id)
-     first = Article.find(first_id)
-     if Article.exists?(second_id)
-       second = Article.find(second_id)
-     else
-       false
-     end
-     merged_body = first.body + second.body
-     final = Article.create(:title => first.title, :author => first.author, :body => merged_body, :user_id => first.user_id, :published => true, :allow_comments => true)
-     comments1 = Feedback.find_all_by_article_id(first_id)
-     if not comments1.blank?
-       comments1.each do |comment|
-          comment.article_id = final.id
-          comment.save
-       end
-     end
-     comments2 = Feedback.find_all_by_article_id(second_id)
-     if not comments2.blank?
-       comments2.each do |comment|
-          comment.article_id = final.id
-          comment.save
-       end
-     end
-     Article.destroy(first_id)
-     Article.destroy(second_id)
-     final
-   end
-
     def last_draft(article_id)
       article = Article.find(article_id)
       while article.has_child?
