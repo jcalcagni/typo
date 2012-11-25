@@ -27,9 +27,22 @@ class Admin::ContentController < Admin::BaseController
     new_or_edit
   end
 
+  def merge
+   @target = params[:merge_with]
+   @article = Article.find(params[:current])
+   if @article.merge(@target)
+    flash[:notice] = "Merge Successful"
+   else
+    flash[:warn] = "Merge Failed"
+   end
+   redirect_to :action => 'index'
+  end
+
+
   def edit
+    #@is_admin_user = current_user.admin?
+    @admin_check = Profile.find(current_user.profile_id).label == "admin"
     @article = Article.find(params[:id])
-    @is_admin_user = current_user.admin?
     unless @article.access_by? current_user
       redirect_to :action => 'index'
       flash[:error] = _("Error, you are not allowed to perform this action")

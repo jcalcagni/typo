@@ -84,21 +84,6 @@ class Article < Content
   #find the other article, merge this article with the other article body
   #then keep comments by adding to merged article before destroying article
   
-  def merge_with other_article_id
-    other_article = Article.find(other_article_id)
-    self.body = self.body + "\n" + other_article.body
-  
-    comments = other_article.comments
-    comments.each do |comment|
-      comment.article = self
-      comment.save
-      Comment.create(comment.attributes)
-    end
-  
-    other_article.destroy
-    self
-  end
-
   attr_accessor :draft, :keywords
 
   has_state(:state,
@@ -422,6 +407,27 @@ class Article < Content
   def password_protected?
     not password.blank?
   end
+
+  def assoc_comments
+   Comment.find_by_article_id(self.id)
+  end
+
+
+  def merge(target_index)
+    @current_article = Article.find(self.id)
+    @merge_article = Article.find(target_index)
+    @current_article.body += "#{@merge_article.body}"
+    @current_article.save!
+    @comments = Comment.find_all_by_article_id(target_index)
+    @comments.each do |comment|
+      comment.article_id = self.id
+      comment.save!
+    end
+    @merge_article.destroy
+    return true
+  end 
+
+
 
   def add_comment(params)
     comments.build(params)
