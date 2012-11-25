@@ -9,7 +9,7 @@
                <h4><%= _("Merge Articles") %></h4>
                <label for "merge_with" style="width:auto;margin:0px 5px 10px 0px">Article ID</label>
                <input type="text" name="merge_with" style="margin:0px 0px 10px 0px"/> <br>
-               <input type="hidden" name="id" value=<%=@article.id %> />
+               <input type="hidden" name="id" value=<%= @article.id %> />
                <%= submit_tag 'Merge with Article', {:class => 'btn info'} %>
        <% end %>
 <% end %>
