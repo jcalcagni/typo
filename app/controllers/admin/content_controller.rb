@@ -6,6 +6,16 @@ class Admin::ContentController < Admin::BaseController
 
   cache_sweeper :blog_sweeper
 
+   def merge
+     if Article.merge(params[:id], params[:merge_with])
+       flash[:notice] = _("Your articles were merged successfully.")
+       redirect_to '/admin/content'
+     else
+       flash[:notice] = ("Invalid Article ID.")
+       redirect_to "/admin/content/edit/#{params[:id]}#"
+     end
+   end
+
   def auto_complete_for_article_keywords
     @items = Tag.find_with_char params[:article][:keywords].strip
     render :inline => "<%= raw auto_complete_result @items, 'name' %>"
@@ -28,7 +38,7 @@ class Admin::ContentController < Admin::BaseController
   end
 
   def edit
-    @is_admin_user = current_user.admin?
+    #@is_admin_user = current_user.admin?
     @article = Article.find(params[:id])
     unless @article.access_by? current_user
       redirect_to :action => 'index'
