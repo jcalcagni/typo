@@ -95,7 +95,7 @@ class Article < Content
       Comment.create(comment.attributes)
     end
   
-    other_article.delete #destroy
+    other_article.destroy
     self
   end
 
