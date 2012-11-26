@@ -43,7 +43,7 @@ class Admin::ContentController < Admin::BaseController
     @article_merged = Article.merge_with(@article.id, params[:merge_with])
     flash[:notice] = _("Article ID: #{params[:id]} was merged with Article ID: #{params[:merge_with]} - #{@article_merged.title}")
     redirect_to({:controller=>"admin/content", :action=>"edit", :id=>params[:id]})
-
+  end
 
   def destroy
     @record = Article.find(params[:id])
