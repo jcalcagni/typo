@@ -28,7 +28,7 @@ class Admin::ContentController < Admin::BaseController
   end
 
   def edit
-    @is_admin_user = current_user.admin?
+    #@is_admin_user = current_user.admin?
     @article = Article.find(params[:id])
     unless @article.access_by? current_user
       redirect_to :action => 'index'
@@ -37,6 +37,13 @@ class Admin::ContentController < Admin::BaseController
     end
     new_or_edit
   end
+
+  def merge
+    @article = Article.find(params[:id]
+    @article_merged = Article.merge_with(@article.id, params[:merge_with])
+    flash[:notice] = _("Article ID: #{params[:id]} was merged with Article ID: #{params[:merge_with]} - #{@article_merged.title}")
+    redirect_to({:controller=>"admin/content", :action=>"edit", :id=>params[:id]})
+
 
   def destroy
     @record = Article.find(params[:id])

@@ -84,22 +84,6 @@ class Article < Content
   #find the other article, merge this article with the other article body
   #then keep comments by adding to merged article before destroying article
   
-  def merge_with other_article_id
-    other_article = Article.find(other_article_id)
-    self.body = self.body + "\n" + other_article.body
-  
-    comments = other_article.comments
-    comments.each do |comment|
-      comment.article = self
-      comment.save
-      Comment.create(comment.attributes)
-    end
-  
-    other_article.delete #destroy
-    self
-  end
-
- 
   attr_accessor :draft, :keywords
 
   has_state(:state,
@@ -121,6 +105,17 @@ class Article < Content
         article = Article.child_of(article.id).first
       end
       article
+    end
+    
+    def merge_with(first_id, second_id)
+      article_first = Article.find(first_id)
+      article_second = Article.find(second_id)
+      article_second.body = article.second.title + "<br>" + article_second.body
+      article_first.body += article_second.body
+      article_first.save
+      article_first.comments << article_second.comments
+      Article.destroy(second_id)
+      article_first
     end
 
     def search_with_pagination(search_hash, paginate_hash)
