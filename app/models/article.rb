@@ -83,7 +83,22 @@ class Article < Content
   #Change to add merge functionality for Saas CS 169.2x
   #find the other article, merge this article with the other article body
   #then keep comments by adding to merged article before destroying article
+    
+  def merge_with other_article_id
+    other_article = Article.find(other_article_id)
+    self.body = self.body + "\n" + other_article.body
   
+    comments = other_article.comments
+    comments.each do |comment|
+      comment.article = self
+      comment.save
+      Comment.create(comment.attributes)
+    end
+  
+    other_article.delete #destroy
+    self
+  end
+
   attr_accessor :draft, :keywords
 
   has_state(:state,
@@ -418,21 +433,6 @@ class Article < Content
 
   def access_by?(user)
     user.admin? || user_id == user.id
-  end
-
-  def merge(id_to_merge)
-    unless to_merge = Article.find_by_id(id_to_merge)
-      self.error.add_to_base("Article does not exist")
-      return false
-    end
-    self.body_and_extended = self.body_and_extended + to_merge.body_and_extended
-    self.save
-    for comment in to_merge.comments
-      comment.article_id = self.id
-      comment.save
-    end
-    to_merge = Article.find(id_to_merge)
-    to_merge.destroy
   end
 
   protected
