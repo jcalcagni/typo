@@ -1,0 +1,6 @@
+<h2>Merge Articles> </h2>
+  <%= form_tag({:action => "merge", :id => @article_id}, :enctype => "multipart/form-data") do %>
+     Article ID: <input id="merge_with" name="merge_with" value="">
+     >input id='merge_articles' type="submit" value=<%= _('Merge') %>" name="merge_article" />
+  <% end %>
+

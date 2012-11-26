@@ -106,17 +106,6 @@ class Article < Content
       end
       article
     end
-    
-    def merge_with(first_id, second_id)
-      article_first = Article.find(first_id)
-      article_second = Article.find(second_id)
-      article_second.body = article.second.title + "<br>" + article_second.body
-      article_first.body += article_second.body
-      article_first.save
-      article_first.comments << article_second.comments
-      Article.destroy(second_id)
-      article_first
-    end
 
     def search_with_pagination(search_hash, paginate_hash)
       
@@ -429,6 +418,21 @@ class Article < Content
 
   def access_by?(user)
     user.admin? || user_id == user.id
+  end
+
+  def merge(id_to_merge)
+    unless to_merge = Article.find_by_id(id_to_merge)
+      self.error.add_to_base("Article does not exist")
+      return false
+    end
+    self.body_and_extended = self.body_and_extended + to_merge.body_and_extended
+    self.save
+    for comment in to_merge.comments
+      comment.article_id = self.id
+      comment.save
+    end
+    to_merge = Article.find(id_to_merge)
+    to_merge.destroy
   end
 
   protected

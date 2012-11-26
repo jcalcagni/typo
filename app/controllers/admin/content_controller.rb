@@ -23,6 +23,25 @@ class Admin::ContentController < Admin::BaseController
     end
   end
 
+  def merge
+    unless current_user.profile_id == 1
+      redirect_to :action => 'index'
+      flash[:error] = _("Error, you are not allowed to perform this action")
+      return
+    end
+    unless params[:merge_with] != params[:id]
+      redirect_to :action => 'index'
+      flash[:error] = _("Cannot merge the same article")
+      return
+    end
+    
+    @article = Article.find(params[:id])
+    if not @article.merge(params[:merge_with])
+      flash[:error] = @article.errors.full_messages.to_sentence
+    end  
+    redirect_to :action => 'index'
+  end
+
   def new
     new_or_edit
   end
@@ -36,13 +55,6 @@ class Admin::ContentController < Admin::BaseController
       return
     end
     new_or_edit
-  end
-
-  def merge
-    @article = Article.find(params[:id])
-    @article_merged = Article.merge_with(@article.id, params[:merge_with])
-    flash[:notice] = _("Article ID: #{params[:id]} was merged with Article ID: #{params[:merge_with]} - #{@article_merged.title}")
-    redirect_to({:controller=>"admin/content", :action=>"edit", :id=>params[:id]})
   end
 
   def destroy
